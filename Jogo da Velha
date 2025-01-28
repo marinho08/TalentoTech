@@ -2,27 +2,110 @@
 <html>
 <head>
 <title>Jogo da Velha</title>
+<style>
+    #board {
+        display: grid;
+        grid-template-columns: repeat(3, 100px);
+        gap: 5px;
+        margin: 20px 0;
+    }
+    .cell {
+        width: 100px;
+        height: 100px;
+        border: 1px solid black;
+        text-align: center;
+        line-height: 100px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .cell.taken {
+        pointer-events: none;
+        background-color: #f0f0f0;
+    }
+</style>
 </head>
 <body>
     <form>
+        <h1>Jogo da Velha</h1>
+        <p>Tabuleiro do Jogo</p>
+        <div id="board">
+            <!-- Células do tabuleiro serão geradas dinamicamente -->
+        </div>
+        <p id="message">É a vez do jogador X</p>
+        <input type="button" value="Reiniciar Jogo" id="restart">
+        <a href="https://ead.uepg.br/site/talento_tech">Visit Talento Tech</a>
+    </form>
 
-<h1>Jogo da Velha</h1>
-<p>Tabuleiro do Jogo</p>
-<div id="board" style="display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 10px;">
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;">X</div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;"></div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;">O</div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;"></div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;">X</div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;"></div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;"></div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;">O</div>
-    <div style="width: 100px; height: 100px; border: 1px solid black; text-align: center; vertical-align: middle; line-height: 100px; font-size: 24px;"></div>
-</div>
-<p>Para jogar, clique em uma célula vazia.</p>
-<input type="submit" value="Reiniciar Jogo">
-<a href="https://ead.uepg.br/site/talento_tech">Visit Talento Tech</a>
-</form> 
+    <script>
+        const board = document.getElementById('board');
+        const message = document.getElementById('message');
+        const restartButton = document.getElementById('restart');
+
+        let currentPlayer = 'X';
+        let gameActive = true;
+        const gameState = Array(9).fill(null);
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function createBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const cellIndex = parseInt(cell.getAttribute('data-index'));
+
+            if (gameState[cellIndex] || !gameActive) return;
+
+            gameState[cellIndex] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add('taken');
+
+            if (checkWinner()) {
+                message.textContent = Jogador ${currentPlayer} venceu!;
+                gameActive = false;
+                return;
+            }
+
+            if (gameState.every(cell => cell)) {
+                message.textContent = 'Empate!';
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            message.textContent = É a vez do jogador ${currentPlayer};
+        }
+
+        function checkWinner() {
+            return winningConditions.some(condition => {
+                const [a, b, c] = condition;
+                return gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c];
+            });
+        }
+
+        function restartGame() {
+            gameState.fill(null);
+            currentPlayer = 'X';
+            gameActive = true;
+            message.textContent = 'É a vez do jogador X';
+            createBoard();
+        }
+
+        restartButton.addEventListener('click', restartGame);
+
+        createBoard();
+    </script>
 </body>
-
 </html>
